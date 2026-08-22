@@ -1,26 +1,48 @@
 const { transporter } = require("./Email");
 
-const sendQR = async(email,qrCode,name,eventName,registrationId)=>{
-    await transporter.sendMail({
-    to: email,
-    from: process.env.GMAIL,
-    subject: "Event Registration Successful",
-    html: `
-        <h2>Hello ${name}</h2>
-        <p>You have successfully registered for <b>${eventName}</b>.</p>
-        <p>Registration ID: <b>${registrationId}</b></p>
-        <img src="cid:qrcode" alt="QR Code" />
-        <p>Please show this QR code at the event entrance.</p>
-    `,
-    attachments: [
-        {
-            filename: "qrcode.png",
-            content: qrCode.replace(/^data:image\/png;base64,/, ""),
-            encoding: "base64",
-            cid: "qrcode",
+const sendQR = async (
+  email,
+  qrCode,
+  name,
+  eventName,
+  registrationId
+) => {
+  try {
+    const reponse =
+      await transporter.transactionalEmails.sendTransacEmail({
+        sender: {
+          name: "Event Management System",
+          email: process.env.EMAIL_USER,
         },
-    ],
-});
-}
 
-module.exports = sendQR
+        to: [
+          {
+            email: email,
+          },
+        ],
+
+        subject: "Event Registration Successful",
+
+        htmlContent: `
+          <h2>Hello ${name}</h2>
+
+          <p>You have successfully registered for <b>${eventName}</b>.</p>
+
+          <p>Registration ID: <b>${registrationId}</b></p>
+
+          <img src="${qrCode}" alt="QR Code" />
+
+          <p>Please show this QR code at the event entrance.</p>
+        `,
+      });
+
+    console.log("QR EMAIL SENT SUCCESSFULLY");
+
+    return reponse;
+  } catch (error) {
+    console.log("QR EMAIL ERROR:", error.message);
+    throw error;
+  }
+};
+
+module.exports = sendQR;
