@@ -4,6 +4,7 @@ import { useForm } from "react-hook-form";
 import axios from "axios";
 import { userContext } from "../../../context/UserContext";
 import { useNavigate } from "react-router-dom";
+import api from "../../../api/axios";
 const Otp = () => {
   const {
     register,
@@ -28,8 +29,8 @@ const Otp = () => {
     data.email = email;
 
     try {
-      const response = await axios.post(
-        `http://localhost:5000/api/v1/auth/verify`,
+      const response = await api.post(
+        `/api/v1/auth/verify`,
         data,
         {
           withCredentials: true,
