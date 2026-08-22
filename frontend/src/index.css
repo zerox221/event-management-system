@@ -1,0 +1,18 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700&display=swap');
+.bar::-webkit-scrollbar{
+    display: none;
+}
+
+.active{
+    color: #5b4bff;
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+}
+
+h1, h2, h3 {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+}
+
+@import "tailwindcss";
