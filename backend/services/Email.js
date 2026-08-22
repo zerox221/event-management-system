@@ -8,6 +8,7 @@ const transporter = new BrevoClient({
 });
 
 const sendMessage = async (otp, email) => {
+  console.log("OTP API HIT");
   console.log("otp function is called");
   console.log("Sending OTP to:", email);
 
