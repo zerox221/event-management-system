@@ -4,6 +4,7 @@ const otpGenrator = require("otp-genrator");
 const TempUser = require("../models/TempUser");
 const jwt = require("jsonwebtoken");
 const { sendMessage } = require("../services/Email");
+const ForgetPassword = require("../models/ForgetPassword");
 require("dotenv").config();
 
 exports.registerController = async (req, res) => {
@@ -111,20 +112,23 @@ exports.verifyController = async (req, res) => {
         profile: findUser.profile,
         role: findUser.role,
       });
+
       const deleteUser = await TempUser.deleteOne({ email });
       //create a payload for jwt
+
       const payload = {
         id: user._id,
         email: user.email,
       };
+
       //make a token using jwt
-      const token = jwt.sign(payload, process.env.JWT_SECRET, {
-        expiresIn: "5d",
+      const token = jwt.sign(payload, process.env.JWT_SECRET,{
+        expiresIn: "10d",
       });
 
       //send token using cookie
       res.cookie("token", token, {
-        maxAge: 30 * 24 * 60 * 60 * 1000,
+        maxAge: 10 * 24 * 60 * 60 * 1000,
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
         sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
@@ -184,11 +188,11 @@ exports.loginController = async (req, res) => {
       };
 
       const token = jwt.sign(payload, process.env.JWT_SECRET, {
-        expiresIn: "2d",
+        expiresIn: "10d",
       });
 
       res.cookie("token", token, {
-        maxAge: 30 * 24 * 60 * 60 * 1000,
+        maxAge: 10 * 24 * 60 * 60 * 1000,
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
         sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
@@ -244,6 +248,99 @@ exports.logoutController = async (req, res) => {
       success: false,
       message: "not able to log out errorin log out controller",
       error: error.message,
+    });
+  }
+};
+
+exports.resendOtp = async (req, res) => {
+  try {
+    const { email } = req.body;
+    if (!email) {
+      return res.status(400).json({
+        success: false,
+        message: "please fill all the fields",
+      });
+    }
+    const newOtp = await otpGenrator.OTPGeneration(6, {
+      upperCaseAlphabets: false,
+      lowerCaseAlphabets: false,
+      specialChars: false,
+    });
+
+    if (!newOtp) {
+      return res.status(403).json({
+        success: false,
+        message: "server error cannot gernate otp",
+      });
+    }
+    const userOtp = await TempUser.findOneAndUpdate(
+      { email },
+      {
+        otp: Otp,
+      },
+    );
+
+    if (!userOtp) {
+      return res.status(400).json({
+        success: false,
+        message:
+          "your details are expired please go to Signup page and create account again",
+      });
+    }
+    res.status(200).json({
+      success: true,
+      message: "otp has been sent",
+    });
+  } catch (error) {
+    console.log("error in send otp controller : ", error.message);
+    res.status(500).json({
+      success: false,
+      message: "internal server error",
+    });
+  }
+};
+
+exports.forgetPassword = async (req, res) => {
+  try {
+    const { email } = req.body;
+    if (!email) {
+      return res.status(500).json({
+        success: false,
+        message: "please fill all the fields",
+      });
+    }
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(403).json({
+        success: false,
+        message: "you dont have account please register first",
+      });
+    }
+
+    const otp = await otpGenrator.OTPGeneration(6, {
+      upperCaseAlphabets: false,
+      specialChars: false,
+      lowerCaseAlphabets: false,
+    });
+
+    await ForgetPassword.create({email},{
+      email : email,
+      otp,
+    },
+    {upsert : true},
+    {returnDocument : after},
+  )
+
+  res.status(200).json({
+    success : true,
+    message : "otp has been sent"
+  })
+
+  } catch (error) {
+    console.log("error in forgetPassword handler");
+    return res.status(500).json({
+      success: false,
+      message: "internal server error",
     });
   }
 };

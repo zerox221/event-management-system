@@ -23,9 +23,18 @@ app.use(
   }),
 );
 
+const allowedOrigins = ["http://localhost:5173", process.env.BASE_URL];
+
 app.use(
   cors({
-    origin: process.env.BASE_URL,
+    origin: function (origin, callback) {
+      // Allow requests with no origin, such as Postman
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
     credentials: true,
   }),
 );

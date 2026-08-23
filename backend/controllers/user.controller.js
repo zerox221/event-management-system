@@ -51,7 +51,7 @@ exports.viewAllEventsController = async (req, res) => {
       eventDate: {
         $gte: new Date(),
       },
-    }).sort({createdAt : -1});
+    }).sort({ createdAt: -1 });
     if (!allEvents) {
       return res.status(500).json({
         success: false,
@@ -228,22 +228,17 @@ exports.searchEvent = async (req, res) => {
 
 exports.volunteerJoinController = async (req, res) => {
   try {
-    const { join , phoneNumber } = req.body;
+    const { join, phoneNumber } = req.body;
     const id = req.params.token;
     const event = req.params.event;
     const userId = req.user.id;
 
-    if(!phoneNumber){
+    if (!phoneNumber) {
       return res.status(400).json({
-        success : false,
-        message : "please fill all the fields",
-      })
+        success: false,
+        message: "please fill all the fields",
+      });
     }
-    await User.findByIdAndUpdate(userId,{
-      additionalInfo : {
-        phone : phoneNumber,
-      }
-    })
 
     if (join === true) {
       const findEvent = await volunteerInvites.findOne({ event, token: id });
@@ -276,6 +271,12 @@ exports.volunteerJoinController = async (req, res) => {
             message: "The event is full. You cannot join as a volunteer now.",
           });
         }
+
+        await User.findByIdAndUpdate(userId, {
+          additionalInfo: {
+            phone: phoneNumber,
+          },
+        });
 
         const saveUser = await volunteer.findOneAndUpdate(
           { event: findEvent.event },
