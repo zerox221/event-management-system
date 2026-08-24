@@ -11,6 +11,9 @@ export function UserContextProvider({ children }) {
   const [events, setEvents] = useState([]);
   const [isVolunteer, setIsVolunteer] = useState([]);
   const [allEvents, setAllEvents] = useState(null);
+  const [summary, setSummary] = useState(null);
+  const [data, setData] = useState(null);
+  const [topPerformingEvents, setTopPerformingEvents] = useState(null);
 
   async function fetchEvents() {
     try {
@@ -58,6 +61,26 @@ export function UserContextProvider({ children }) {
     fetchUser();
   }, []);
 
+  const EventsSummary = [];
+
+  async function fetchDashboardSummary() {
+    try {
+      const response = await api.get("/api/v1/admin/get/dashboard/summary");
+      setSummary(response.data.dashboardSummary);
+      setData(response?.data?.eventsRegistration);
+      setTopPerformingEvents(response?.data?.topPerformingEvents);
+    } catch (error) {
+      console.log(error.response.data.message);
+    }
+  }
+
+  useEffect(() => {
+    if (user?.role === "organizer") {
+       console.log("calling summary event");
+      fetchDashboardSummary();
+    }
+  }, [user]);
+
   const values = {
     user,
     setUser,
@@ -75,6 +98,10 @@ export function UserContextProvider({ children }) {
     allEvents,
     fetchAllEvents,
     fetchUser,
+    EventsSummary,
+    topPerformingEvents,
+    summary,
+    data
   };
 
   useEffect(() => {

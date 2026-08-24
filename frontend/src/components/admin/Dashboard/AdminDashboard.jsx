@@ -16,30 +16,16 @@ import TopPerformingEvents from "./TopPerformingEvents";
 import TopVolunteer from "./TopVolunteer";
 import ActivityStrem from "./ActivityStrem";
 import { NavLink } from "react-router-dom";
+import { useContext } from "react";
+import { userContext } from "../../../context/UserContext";
 
 const AdminDashboard = () => {
-  const [summary, setSummary] = useState(null);
-  const [data, setData] = useState(null);
-  const [topPerformingEvents, setTopPerformingEvents] = useState(null);
-  const EventsSummary = [];
 
-  async function fetchDashboardSummary() {
-    try {
-      const response = await api.get("/api/v1/admin/get/dashboard/summary");
-      setSummary(response.data.dashboardSummary);
-      setData(response?.data?.eventsRegistration);
-      setTopPerformingEvents(response?.data?.topPerformingEvents);
-    } catch (error) {
-      console.log(error.response.data.message);
-    }
-  }
+  const {topPerformingEvents,summary,data,EventsSummary} = useContext(userContext);
+  console.log("event summary",EventsSummary)
 
-  useEffect(() => {
-    fetchDashboardSummary();
-  }, []);
-
-  EventsSummary.push(
-    { name: "total Regi..", value: summary?.totalRegisteredUsers, icon: Users },
+  const summaryObj = [
+{ name: "total Regi..", value: summary?.totalRegisteredUsers, icon: Users },
     {
       name: "checked-in",
       value: summary?.totalAttendedUsers,
@@ -49,7 +35,12 @@ const AdminDashboard = () => {
     { name: "completed", value: summary?.completedEvents, icon: CheckCircle2 },
     { name: "upcoming", value: summary?.upcomingEvents, icon: Clock },
     { name: "volunteer", value: summary?.totalVolunteers, icon: UserRoundIcon },
-  );
+  ]
+
+  summaryObj.forEach((summary)=>{
+    EventsSummary.push(summary)
+  })
+
   return (
     <div className="min-h-screen select-none md:h-screen md:p-4  p-2 flex flex-col gap-10 overflow-y-scroll">
       <div className="min-h-20 mt-5 ">

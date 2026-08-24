@@ -3,33 +3,43 @@ import React, { useEffect, useState } from "react";
 import api from "../../../api/axios";
 
 const ActivityStreamCard = ({ info }) => {
-  const [hour, setHour] = useState(null);
-  const [minute, setMinut] = useState(null);
-  const [day, setDay] = useState(null);
+  const [time, setTime] = useState(0);
+  const [timeType, setTimeType] = useState("seconds");
 
-  const Eventdate = new Date(info?.createdAt);
-  const currentTime = Date.now();
-  const minutes = Math.round(Eventdate.getTime() / 60000);
+  //calculating time
+  function calculateTime() {
+    const userTime = new Date(info?.createdAt);
+    const userTimeInMilisconds = userTime.getTime();
+    const currentTime = Date.now();
+    const difference = currentTime - userTimeInMilisconds;
+    const userTimeInSeconds = Math.floor(difference / 1000);
 
-  const timeSinceActivity = Math.round(currentTime / 60000) - minutes;
+    const userTimeInMinute = Math.floor(userTimeInSeconds / 60);
+    const userTimeInHour = Math.floor(userTimeInMinute / 60);
+    const userTimeInday = Math.floor(userTimeInHour / 24);
+
+    if (userTimeInSeconds < 60) {
+      console.log("in seconds", userTimeInSeconds);
+      setTime(userTimeInSeconds);
+    } else if (userTimeInSeconds > 60 && userTimeInMinute < 60) {
+      setTimeType("minute");
+      console.log("in minute", userTimeInMinute);
+      setTime(userTimeInMinute);
+    } else if (userTimeInMinute > 60 && userTimeInHour < 24) {
+      setTimeType("hour");
+      console.log("in hour", userTimeInHour);
+      setTime(userTimeInHour);
+    } else if (userTimeInHour > 24) {
+      setTimeType("day");
+      console.log("in days", userTimeInday);
+      setTime(userTimeInday);
+    }
+  }
 
   useEffect(() => {
-    setMinut(timeSinceActivity);
+    calculateTime();
   }, []);
 
-  if (timeSinceActivity >= 60) {
-    let hour = currentTime / (1000 * 60 * 60) - Eventdate.getTime() / (1000 * 60 * 60);
-    const result = Number(hour.toFixed(1));
-
-    if(hour>24){
-        const day = hour / 24;
-        setDay(day);
-    }
-
-    useEffect(() => {
-      setHour(result);
-    }, []);
-  }
   return (
     <div className="flex gap-4 p-2 items-center">
       <div className="bg-indigo-600 shrink-0 h-10 w-10 rounded-full flex justify-center items-center">
@@ -38,23 +48,20 @@ const ActivityStreamCard = ({ info }) => {
       <div className="text-sm flex  flex-col w-full">
         <div>
           <span className="font-bold">{info?.name} </span>
-          {info?.status} for {" "}
+          {info?.status} for{" "}
           <span className="text-indigo-700">{info?.eventName}</span>
         </div>
-        {hour && (
-          <span className="md:text-sm text-xs text-neutral-600">
-            {hour} hr ago
-          </span>
+        {timeType === "second" && (
+          <span className="md:text-sm text-xs text-neutral-600">{time} sec ago</span>
         )}
-        {!hour && (
-          <span className="md:text-sm text-xs text-neutral-600">
-            {minute} min ago
-          </span>
+        {timeType === "minute" && (
+          <span className="md:text-sm text-xs text-neutral-600">{time} min ago</span>
         )}
-        {day && (
-          <span className="md:text-sm text-xs text-neutral-600">
-            {day} min ago
-          </span>
+        {timeType === "hour" && (
+          <span className="md:text-sm text-xs text-neutral-600">{time} hour ago</span>
+        )}
+        {timeType === "day" && (
+          <span className="md:text-sm text-xs text-neutral-600">{time} day ago</span>
         )}
       </div>
     </div>

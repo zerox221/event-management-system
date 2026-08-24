@@ -48,8 +48,8 @@ const ActivityStream = () => {
               Loading activity...
             </span>
           </div>
-        ) : registeredUsers.length > 0 ? (
-          registeredUsers.map((info) => (
+        ) : registeredUsers?.length > 0 ? (
+          registeredUsers?.map((info) => (
             <ActivityStreamCard
               key={info._id}
               info={info}
