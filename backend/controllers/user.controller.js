@@ -93,7 +93,7 @@ exports.registraionController = async (req, res) => {
       });
     }
 
-    if (checkEvent.participants >= checkEvent.maxParticipants) {
+    if (checkEvent.participants >= checkEvent.maxParticpants) {
       return res.status(400).json({
         success: false,
         message: "Event is full. There are no seats left.",

@@ -51,9 +51,10 @@ const RegisteredEvents = () => {
   return (
     <div className="min-h-screen gap-8 flex flex-col w-full md:7 p-4 bg-slate-50 ">
       <div className="flex gap-3 bg-gray-200 p-1 w-fit rounded-xl">
-        {filters.map((filter) => {
+        {filters.map((filter,idx) => {
           return (
-            <span
+            <span 
+            key={idx}
               onClick={() => setSelectedFilter(filter)}
               className={`${selectedFilter === filter ? "bg-indigo-600 text-white" : ""} text-xs p-1 px-2 rounded-xl text-neutral-500 select-none cursor-pointer  md:text-sm font-medium`}
             >
@@ -68,14 +69,14 @@ const RegisteredEvents = () => {
         <div className="flex gap-5h-full gap-8 justify-center flex-wrap md:items-start items-center">
           {(selectedFilter).toLowerCase() === "upcoming" ? upcomingEvents?.length!==0 ?
             upcomingEvents?.map((event) => {
-              return <RegisteredUserCards event={event.event} />;
+              return <RegisteredUserCards key={event._id} event={event.event} />;
             }):<NoEventFound/>
             :null
           }
             {
              (selectedFilter).toLowerCase()==="completed" ? completedEvents?.length!==0 ?
               completedEvents?.map((event)=>{
-                return  <RegisteredUserCards event={event.event} />;
+                return  <RegisteredUserCards key={event._id} event={event.event} />;
               }):<NoEventFound/>
               :null
             }

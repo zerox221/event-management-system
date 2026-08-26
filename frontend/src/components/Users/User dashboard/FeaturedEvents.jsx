@@ -2,22 +2,12 @@ import React, { useEffect, useState } from "react";
 import FeaturedEventsCard from "./FeaturedEventsCard";
 import { NavLink } from "react-router-dom";
 import api from "../../../api/axios";
+import { useContext } from "react";
+import { userContext } from "../../../context/UserContext";
 
 const FeaturedEvents = () => {
-  const [events, setEvents] = useState([]);
-
-  async function fetchEvents() {
-    try {
-      const response = await api.get(`/api/v1/user/get/latest/events`);
-      setEvents(response.data.events);
-    } catch (error) {
-      console.log(error.response.data.message);
-    }
-  }
-
-  useEffect(()=>{
-        fetchEvents();
-  },[])
+  // const [events, setEvents] = useState([]);
+const {featuredEvents} = useContext(userContext);
 
   return (
     <div className="min-h-20 w-full py-5 flex flex-col gap-4 ">
@@ -27,7 +17,7 @@ const FeaturedEvents = () => {
       </div>
       <div className="bar px-1 py-2 overflow-hidden flex gap-5 md:gap-6 overflow-x-scroll">
         {
-            events?.map((event)=>{
+            featuredEvents?.map((event)=>{
                 return      <FeaturedEventsCard key={event._id} event={event} />
             })
         }

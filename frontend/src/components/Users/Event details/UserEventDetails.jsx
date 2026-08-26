@@ -1,4 +1,11 @@
-import { Calendar, Check, Clock, MapPin, UserCheck2, UsersRound } from "lucide-react";
+import {
+  Calendar,
+  Check,
+  Clock,
+  MapPin,
+  UserCheck2,
+  UsersRound,
+} from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import EventInformation from "./EventInformation";
@@ -6,47 +13,51 @@ import api from "../../../api/axios";
 import { motion } from "framer-motion";
 import CretedBy from "./CretedBy";
 import { toast } from "react-toastify";
+import EventDetailSkeleton from "../../loaders/EventDetailsSkeleton";
 
 const UserEventDetails = () => {
-
-    const [loading,setLoading] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [infoloading, setInfoLoading] = useState(false);
   const { id } = useParams();
-    const [event,setEvent] = useState(null);
-  async function fetchEventDetails (){
+  const [event, setEvent] = useState(null);
+  async function fetchEventDetails() {
+    if (infoloading) {
+      return;
+    }
     try {
-        const response = await api.get(`/api/v1/user/get/details/${id}`);
-        setEvent(response.data.event)
+      setInfoLoading(true);
+      const response = await api.get(`/api/v1/user/get/details/${id}`);
+      setEvent(response.data.event);
     } catch (error) {
-        console.log(error);
+      console.log(error);
+    } finally {
+      setInfoLoading(false);
     }
   }
 
-
-  async function registerUserHandler(){
-    if(loading){
-        return;
+  async function registerUserHandler() {
+    if (loading) {
+      return;
     }
     setLoading(true);
     try {
-        const response = await api.post(`/api/v1/user/registration/${id}`)
-        toast.success(response.data.message);
+      const response = await api.post(`/api/v1/user/registration/${id}`);
+      toast.success(response.data.message);
     } catch (error) {
-        console.log(error);
-        toast.error(error.response.data.message);
-    }
-    finally{
-        setLoading(false);
+      console.log(error);
+      toast.error(error.response.data.message);
+    } finally {
+      setLoading(false);
     }
   }
-
-
-  useEffect(()=>{
+  useEffect(() => {
     fetchEventDetails();
-  },[id])
-
+  }, [id]);
 
   console.log(id);
-  return (
+  return infoloading ? (
+    <EventDetailSkeleton />
+  ) : (
     <div className=" min-h-screen w-full flex flex-col gap-4 p-4 md:p-8 ">
       <div className="h-50 md:h-90 relative w-full rounded-xl overflow-hidden ">
         <img
@@ -56,7 +67,7 @@ const UserEventDetails = () => {
         />
         <div className="absolute bottom-3 left-5 ">
           <span className="text-white bg-indigo-400 p-1 px-3 text-xs rounded-xl">
-            {event?.category || "" }
+            {event?.category || ""}
           </span>
           <h1 className="md:text-2xl text-xl font-semibold text-white">
             {event?.titel || "Event titel"}
@@ -64,7 +75,7 @@ const UserEventDetails = () => {
           <div className="flex text-neutral-50  gap-1">
             <span className="flex gap-1 items-center text-xs md:text-sm">
               <Calendar size={15} />
-              <span>{event?.eventDate.split('T')[0]}</span>
+              <span>{event?.eventDate.split("T")[0]}</span>
             </span>
 
             <span className="flex items-center gap-1 text-xs  md:text-sm">
@@ -88,16 +99,19 @@ const UserEventDetails = () => {
         </div>
       </div>
 
-      <CretedBy event = {event}/>
+      <CretedBy event={event} />
 
       <div>
-        <motion.button 
-        disabled={loading}
-        onClick={registerUserHandler}
-        whileTap={{
-            scale:0.96,
-        }}
-        className="bg-[#059266] text-neutral-50 p-2 w-full rounded-md items-center gap-1 flex justify-center"><Check size={20}/> {loading?"Securing your spot...":"Register"}</motion.button>
+        <motion.button
+          disabled={loading}
+          onClick={registerUserHandler}
+          whileTap={{
+            scale: 0.96,
+          }}
+          className="bg-[#059266] text-neutral-50 p-2 w-full rounded-md items-center gap-1 flex justify-center"
+        >
+          <Check size={20} /> {loading ? "Securing your spot..." : "Register"}
+        </motion.button>
       </div>
     </div>
   );

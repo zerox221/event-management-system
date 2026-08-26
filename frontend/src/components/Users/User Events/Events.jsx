@@ -9,9 +9,6 @@ import { useParams } from "react-router-dom";
 const Events = () => {
   const { allEvents } = useContext(userContext);
   console.log(allEvents);
-
-
-
   return (
     <div className="min-h-screen w-full flex gap-3 flex-col md:p-7 p-4 ">
       <div className=" w-full">

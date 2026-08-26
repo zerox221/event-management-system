@@ -15,6 +15,7 @@ export function UserContextProvider({ children }) {
   const [data, setData] = useState(null);
   const [topPerformingEvents, setTopPerformingEvents] = useState(null);
   const [forgetPasswordEmail,setForgetPasswordEmail] = useState(false);
+  const [featuredEvents,setFeaturedEvents] = useState([]);
 
   async function fetchEvents() {
     try {
@@ -35,6 +36,17 @@ export function UserContextProvider({ children }) {
       console.log(error);
     }
   }
+
+    async function fetchFetauredEvents() {
+    try {
+      const response = await api.get(`/api/v1/user/get/latest/events`);
+      setFeaturedEvents(response.data.events);
+    } catch (error) {
+      console.log(error.response.data.message);
+    }
+  }
+
+
 
   async function fetchAllEvents() {
     try {
@@ -82,6 +94,12 @@ export function UserContextProvider({ children }) {
     }
   }, [user]);
 
+    useEffect(()=>{
+    if(user?.role==="user"){
+      fetchFetauredEvents();
+    }
+  },[user])
+
   const values = {
     user,
     setUser,
@@ -104,7 +122,8 @@ export function UserContextProvider({ children }) {
     summary,
     data,
     forgetPasswordEmail,
-    setForgetPasswordEmail
+    setForgetPasswordEmail,
+    featuredEvents,
   };
 
   useEffect(() => {
