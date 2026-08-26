@@ -13,6 +13,7 @@ import {
   CheckCircle,
   Pencil,
   Save,
+  X,
 } from "lucide-react";
 import { userContext } from "../../../context/UserContext";
 import api from "../../../api/axios";
@@ -21,17 +22,11 @@ import { useForm } from "react-hook-form";
 import UserSecurity from "./UserSecurity";
 import VolunteerEvents from "./VolunteerEvents";
 import LogOut from "./LogOut";
-import { motion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 
 const UserProfile = () => {
-  const [showCurrent, setShowCurrent] = useState(false);
-  const [showNew, setShowNew] = useState(false);
-  const [showConfirm, setShowConfirm] = useState(false);
   const { user, fetchUser } = useContext(userContext);
   const [loading, setLoading] = useState(false);
-
-  const [address, setAddress] = useState(user?.additionalInfo?.address || "");
-  const [bio, setBio] = useState(user?.additionalInfo?.bio || "");
 
   const {
     register,
@@ -46,11 +41,9 @@ const UserProfile = () => {
     },
   });
 
-
-
-
   const [change, setChange] = useState(false);
   const [error, setError] = useState(false);
+  const [profilePreview, setProfilPreview] = useState(false);
 
   async function dpChangeHandler(e) {
     if (loading) {
@@ -97,23 +90,146 @@ const UserProfile = () => {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 p-4 md:p-8">
-      <div className="max-w-5xl mx-auto space-y-6">
-        {/* ================= PROFILE HEADER ================= */}
-        <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
-          <div className="flex flex-col sm:flex-row items-center sm:items-start gap-5">
-            {/* Profile Image */}
-            <div className="relative">
+    <div className="min-h-screen relative bg-slate-50 p-4 md:p-8">
+      <AnimatePresence>
+        {profilePreview && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            onClick={() => setProfilPreview(false)}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4"
+          >
+            <motion.div
+              initial={{
+                scale: 0.8,
+                opacity: 0,
+                y: 20,
+              }}
+              animate={{
+                scale: 1,
+                opacity: 1,
+                y: 0,
+              }}
+              exit={{
+                scale: 0.8,
+                opacity: 0,
+                y: 20,
+              }}
+              transition={{
+                duration: 0.25,
+                ease: [0.22, 1, 0.36, 1],
+              }}
+              onClick={(e) => e.stopPropagation()}
+              className="
+            relative
+            w-[80vw]
+            max-w-[420px]
+            aspect-square
+            overflow-hidden
+            rounded-2xl
+            bg-slate-200
+            shadow-2xl
+          "
+            >
+              {/* Close Button */}
+              <button
+                onClick={() => setProfilPreview(false)}
+                className="
+              absolute
+              top-3
+              right-3
+              z-10
+              flex
+              h-9
+              w-9
+              items-center
+              justify-center
+              rounded-full
+              bg-black/50
+              text-white
+              backdrop-blur-md
+              transition
+              hover:bg-black/70
+              active:scale-95
+            "
+              >
+                <X size={20} />
+              </button>
+
               <img
                 src={
                   user?.profile?.url ||
-                  `https://ui-avatars.com/api/?name=${user?.name}`
+                  `https://api.dicebear.com/10.x/initials/svg?seed=${user?.name}`
+                }
+                alt="Profile preview"
+                className="h-full w-full object-cover"
+              />
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <div className="max-w-5xl mx-auto space-y-6">
+        {/* PROFILE HEADER */}
+        <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
+          <div className="flex flex-col sm:flex-row items-center sm:items-start gap-5">
+            {/* Profile Image */}
+            <button
+              type="button"
+              onClick={() => setProfilPreview(true)}
+              className="
+            group
+            relative
+            h-24
+            w-24
+            shrink-0
+            overflow-hidden
+            rounded-full
+            border-4
+            border-blue-50
+            focus:outline-none
+            focus:ring-2
+            focus:ring-blue-500
+            focus:ring-offset-2
+          "
+            >
+              <img
+                src={
+                  user?.profile?.url ||
+                  `https://api.dicebear.com/10.x/initials/svg?seed=${user?.name}`
                 }
                 alt="Profile"
-                className="w-24 h-24 rounded-full object-cover border-4 border-blue-50"
+                className="
+              h-full
+              w-full
+              object-cover
+              transition-transform
+              duration-300
+              group-hover:scale-110
+            "
               />
-            </div>
+              {/* Hover Overlay */}
+              <div
+                className="
+              absolute
+              inset-0
+              flex
+              items-center
+              justify-center
+              bg-black/40
+              opacity-0
+              transition-opacity
+              duration-300
+              group-hover:opacity-100
+            "
+              >
+                <span className="text-xs font-medium text-white">View</span>
+              </div>
+            </button>
 
+            {/* Rest of profile content */}
             <div>
               <label
                 className="bg-indigo-500 text-sm  p-1 px-2 rounded-xl text-white"
@@ -121,7 +237,12 @@ const UserProfile = () => {
               >
                 {loading ? "changing..." : "Change Profile"}
               </label>
-              <input onChange={dpChangeHandler} type="file" className="hidden" id="profile" />
+              <input
+                onChange={dpChangeHandler}
+                type="file"
+                className="hidden"
+                id="profile"
+              />
             </div>
 
             {/* User Info */}
@@ -150,7 +271,6 @@ const UserProfile = () => {
                   "
                 >
                   <User size={14} />
-
                   user
                 </span>
               </div>
@@ -337,8 +457,8 @@ const UserProfile = () => {
 
         {/* ================= VOLUNTEER ACTIVITY ================= */}
         <VolunteerEvents />
-        
-        <LogOut/>
+
+        <LogOut />
       </div>
     </div>
   );

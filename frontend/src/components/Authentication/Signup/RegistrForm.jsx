@@ -190,42 +190,6 @@ const RegistrForm = () => {
             )}
           </div>
         </div>
-
-        {/* role field if the formis off register */}
-
-        <div className="flex flex-col gap-1">
-          <label className="text-xs font-semibold font-black/40" htmlFor="role">
-            Role
-          </label>
-          <select
-            {...register("role", {
-              required: "*required",
-            })}
-            name="role"
-            id="role"
-            className="
-            w-full
-    rounded-md
-    border border-[#c2c6d0]
-    bg-white
-    px-4 py-3
-    text-sm text-[#111827]
-    placeholder:text-[#94A3B8]
-    outline-none
-     focus:ring-1
-    ring-indigo-400
-   
-            "
-          >
-            <option value="user">user</option>
-            <option value="organizer">organizer</option>
-          </select>
-
-          {errors.role && (
-            <span className="text-xs text-red-600">{errors.role.message}</span>
-          )}
-        </div>
-
         <div>
     {error && <span className="text-xs text-red-600">{error}</span>}
         </div>

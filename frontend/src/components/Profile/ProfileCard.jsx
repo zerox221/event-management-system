@@ -41,7 +41,7 @@ const ProfileCard = () => {
         <img
           className="h-full w-full object-cover shrink-0"
           src={user?.profile.url}
-          alt=""
+          alt="profile"
         />
       </div>
       <div>

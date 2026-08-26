@@ -24,7 +24,7 @@ const UserNavBar = () => {
       >
         <img
           className="h-full w-full object-cover shrink-0"
-          src={user?.profile?.url || `https://ui-avatars.com/api/${user?.name}`}
+          src={user?.profile?.url || `https://api.dicebear.com/10.x/initials/svg?seed=${user?.name}`}
           alt="profile"
         />
       </div>

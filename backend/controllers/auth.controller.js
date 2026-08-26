@@ -10,10 +10,10 @@ require("dotenv").config();
 
 exports.registerController = async (req, res) => {
   try {
-    const { name, email, password, role } = req.body;
+    const { name, email, password} = req.body;
 
     //validate is information empty or not
-    if (!name || !email || !password || !role) {
+    if (!name || !email || !password ) {
       return res.status(400).json({
         success: false,
         message: "Field are empty please enter details",
@@ -51,7 +51,6 @@ exports.registerController = async (req, res) => {
         password: hashedPassword,
         otp,
         expiresIn: Date.now() + 2 * 60 * 1000,
-        role,
         profile: {
           url: `https://api.dicebear.com/10.x/initials/svg?seed=${name}`,
           publicID: Math.floor(Math.random() * 10).toString(),
@@ -70,6 +69,7 @@ exports.registerController = async (req, res) => {
       email: email,
     });
   } catch (error) {
+
     res.status(500).json({
       success: false,
       message: "their is error in register handler",
