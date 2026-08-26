@@ -14,6 +14,7 @@ export function UserContextProvider({ children }) {
   const [summary, setSummary] = useState(null);
   const [data, setData] = useState(null);
   const [topPerformingEvents, setTopPerformingEvents] = useState(null);
+  const [forgetPasswordEmail,setForgetPasswordEmail] = useState(false);
 
   async function fetchEvents() {
     try {
@@ -101,7 +102,9 @@ export function UserContextProvider({ children }) {
     EventsSummary,
     topPerformingEvents,
     summary,
-    data
+    data,
+    forgetPasswordEmail,
+    setForgetPasswordEmail
   };
 
   useEffect(() => {

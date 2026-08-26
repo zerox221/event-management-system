@@ -28,16 +28,13 @@ const Form = () => {
     setLoading(true);
     console.log(data);
     try {
-      const response = await api.post(
-        `/api/v1/auth/login`,
-        data,
-      );
+      const response = await api.post(`/api/v1/auth/login`, data);
       const loggedInUser = response.data.user;
 
       setUser(response.data.user);
 
       if (loggedInUser.role === "organizer") {
-        navigate('/admin')
+        navigate("/admin");
       } else {
         navigate("/user");
       }
@@ -100,12 +97,15 @@ const Form = () => {
         </div>
 
         <div className="flex flex-col gap-1">
-          <label
-            className="text-xs font-black/40  font-semibold "
-            htmlFor="password"
-          >
-            Password
-          </label>
+          <div className="flex justify-between">
+            <label
+              className="text-xs font-black/40  font-semibold "
+              htmlFor="password"
+            >
+              Password
+            </label>
+            <NavLink to={'/forget/password/request?'} className='text-[10px] text-blue-500 font-medium' >FORGOT PASSWORD</NavLink>
+          </div>
           <input
             {...register("password", {
               required: "*required",

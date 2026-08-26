@@ -5,6 +5,7 @@ const TempUser = require("../models/TempUser");
 const jwt = require("jsonwebtoken");
 const { sendMessage } = require("../services/Email");
 const ForgetPassword = require("../models/ForgetPassword");
+const forgetPasswordOtp = require("../services/ShareForgetPasswordOtp");
 require("dotenv").config();
 
 exports.registerController = async (req, res) => {
@@ -122,7 +123,7 @@ exports.verifyController = async (req, res) => {
       };
 
       //make a token using jwt
-      const token = jwt.sign(payload, process.env.JWT_SECRET,{
+      const token = jwt.sign(payload, process.env.JWT_SECRET, {
         expiresIn: "10d",
       });
 
@@ -276,9 +277,11 @@ exports.resendOtp = async (req, res) => {
     const userOtp = await TempUser.findOneAndUpdate(
       { email },
       {
-        otp: Otp,
+        otp: newOtp,
       },
     );
+
+    sendMessage(newOtp, email);
 
     if (!userOtp) {
       return res.status(400).json({
@@ -300,9 +303,10 @@ exports.resendOtp = async (req, res) => {
   }
 };
 
-exports.forgetPassword = async (req, res) => {
+exports.forgetPasswordOtp = async (req, res) => {
   try {
     const { email } = req.body;
+
     if (!email) {
       return res.status(500).json({
         success: false,
@@ -316,29 +320,138 @@ exports.forgetPassword = async (req, res) => {
         message: "you dont have account please register first",
       });
     }
-
     const otp = await otpGenrator.OTPGeneration(6, {
       upperCaseAlphabets: false,
       specialChars: false,
       lowerCaseAlphabets: false,
     });
 
-    await ForgetPassword.create({email},{
-      email : email,
-      otp,
-    },
-    {upsert : true},
-    {returnDocument : after},
-  )
+    await ForgetPassword.findOneAndUpdate(
+      { email },
+      {
+        email: email,
+        otp: otp,
+      },
+      { upsert: true },
+      { returnDocument: "after" },
+    );
 
-  res.status(200).json({
-    success : true,
-    message : "otp has been sent"
-  })
+    forgetPasswordOtp(email,otp);
 
+    res.status(200).json({
+      success: true,
+      message: "otp has been sent",
+    });
   } catch (error) {
-    console.log("error in forgetPassword handler");
+    console.log("error in forgetPassword handler : ", error.message);
     return res.status(500).json({
+      success: false,
+      message: "internal server error",
+    });
+  }
+};
+
+exports.verifyForgetPasswordOtp = async (req, res) => {
+  try {
+    const { email, otp } = req.body;
+    if (!email || !otp) {
+      res.status(400).json({
+        success: false,
+        message: "please fill all the details",
+      });
+    }
+
+    const isItRealUser = await ForgetPassword.findOne({email});
+
+    if(!isItRealUser){
+      return res.status(400).json({
+        success : false,
+        message : "first verify the otp"
+      })
+    }
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "user not exists with this email",
+      });
+    }
+
+    const ForgetPasswordOtp = await ForgetPassword.findOne({ email });
+    if (!ForgetPasswordOtp) {
+      return res.status(400).json({
+        success: false,
+        message: "otp is expired",
+      });
+    }
+    if (otp === ForgetPasswordOtp.otp) {
+      return res.status(200).json({
+        success: true,
+        message: "otp matched",
+      });
+    } else {
+      return res.status(400).json({
+        success: false,
+        message: "otp is not matched",
+      });
+    }
+  } catch (error) {
+    console.log("error in forget passsword otp handler : ", error.message);
+    res.status(500).json({
+      success: false,
+      message: "internal server error",
+    });
+  }
+};
+
+exports.forgetPassword = async (req, res) => {
+  try {
+    const { email, newPassword } = req.body;
+    if (!newPassword || !email) {
+      res.status(400).json({
+        success: false,
+        message: "please fill all the fields",
+      });
+    }
+
+    const IsUserRequestedForForgetPassword = await ForgetPassword.findOne({
+      email,
+    });
+
+    if (!IsUserRequestedForForgetPassword) {
+      return res.status(400).json({
+        success: false,
+        message: "user do not have permisson to change the password first verify it with otp",
+      });
+    }
+
+    const user = await User.findOne({ email });
+    if (!user) {
+      res.status(400).json({
+        success: false,
+        message: "user not exists",
+      });
+    }
+    const comparePassword = await bcrypt.compare(newPassword, user.password);
+    if (comparePassword) {
+      return res.status(400).json({
+        success: false,
+        message: "enter different password from your previous password",
+      });
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    await User.findOneAndUpdate({ email }, { password: hashedPassword });
+
+    res.status(200).json({
+      success: false,
+      message: "password updated successfully",
+    });
+  } catch (error) {
+    console.log("error in forget password handler : ", error.message);
+    res.status(500).json({
       success: false,
       message: "internal server error",
     });

@@ -36,6 +36,9 @@ import UserProfile from "./components/Users/Profile/UserProfile";
 import ViewAllRegisteredUser from "./components/admin/Dashboard/all registered User/ViewAllRegisteredUser";
 import AppSkeleton from "./components/loaders/SkeltonAppLoading";
 import LandingPage from "./components/landingPage/LandingPage";
+import EnterDetailsForForget from "./components/Authentication/ForgetPassword/EnterDetailsForForget";
+import EnterOtpForForget from "./components/Authentication/ForgetPassword/EnterOtpForForget";
+import CreateNewPassword from "./components/Authentication/ForgetPassword/CreateNewPassword";
 
 const App = () => {
   const { loading, user, isUserVolunteer, isVolunteer } =
@@ -66,6 +69,9 @@ const App = () => {
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/verify" element={<Otp />} />
+            <Route path="/forget/password/request" element={<EnterDetailsForForget/>} />
+            <Route path="/forget/password/verfiy" element={<EnterOtpForForget/>} />
+            <Route path="/forget/password" element={<CreateNewPassword/>} />
           </Route>
 
           {/* user routes */}
