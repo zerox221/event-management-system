@@ -3,7 +3,7 @@ import Form from './Form'
 
 const Login = () => {
   return (
-    <div className='min-h-screen w-full  justify-center items-center flex p-2 '>
+    <div className='min-h-screen w-full  justify-center py-15 md:py-20  flex p-2 '>
        <Form />
     </div>
   )

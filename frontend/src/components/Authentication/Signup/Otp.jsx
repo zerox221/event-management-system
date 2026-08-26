@@ -5,6 +5,8 @@ import axios from "axios";
 import { userContext } from "../../../context/UserContext";
 import { useNavigate } from "react-router-dom";
 import api from "../../../api/axios";
+import { toast } from "react-toastify";
+import { _email } from "zod/v4/core";
 const Otp = () => {
   const {
     register,
@@ -54,6 +56,16 @@ const Otp = () => {
     reset();
   }
 
+  async function resendOtpHandler(){
+    console.log("email : ",email);
+    try {
+      const response = await api.post('/api/v1/auth/reshare/otp',{email});
+      toast.success(response.data.message);
+    } catch (error) {
+        toast.error(error.response.data.message);
+    }
+  }
+
   return (
     <div className="min-h-screen w-full flex justify-center items-center">
       <form
@@ -98,10 +110,10 @@ const Otp = () => {
             Verify
           </button>
         </div>
-        <div className="flex justify-center mt-4">
-          <span>
+        <div className="flex justify-center text-sm mt-4">
+          <span >
             Did'nt receive the code ?{" "}
-            <span className="text-blue-500">Resend code</span>
+            <span onClick={resendOtpHandler} className="text-blue-500">Resend code</span>
           </span>
         </div>
       </form>

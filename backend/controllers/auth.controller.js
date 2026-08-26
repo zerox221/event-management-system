@@ -256,6 +256,7 @@ exports.logoutController = async (req, res) => {
 exports.resendOtp = async (req, res) => {
   try {
     const { email } = req.body;
+    console.log("email : ", email);
     if (!email) {
       return res.status(400).json({
         success: false,
@@ -281,15 +282,14 @@ exports.resendOtp = async (req, res) => {
       },
     );
 
-    sendMessage(newOtp, email);
-
     if (!userOtp) {
       return res.status(400).json({
         success: false,
         message:
-          "your details are expired please go to Signup page and create account again",
+          "your details are expired please go to Signup page and fill the details  again",
       });
     }
+    sendMessage(newOtp, email);
     res.status(200).json({
       success: true,
       message: "otp has been sent",
@@ -336,7 +336,7 @@ exports.forgetPasswordOtp = async (req, res) => {
       { returnDocument: "after" },
     );
 
-    forgetPasswordOtp(email,otp);
+    forgetPasswordOtp(email, otp);
 
     res.status(200).json({
       success: true,
@@ -361,13 +361,13 @@ exports.verifyForgetPasswordOtp = async (req, res) => {
       });
     }
 
-    const isItRealUser = await ForgetPassword.findOne({email});
+    const isItRealUser = await ForgetPassword.findOne({ email });
 
-    if(!isItRealUser){
+    if (!isItRealUser) {
       return res.status(400).json({
-        success : false,
-        message : "first verify the otp"
-      })
+        success: false,
+        message: "first verify the otp",
+      });
     }
     const user = await User.findOne({ email });
 
@@ -422,7 +422,8 @@ exports.forgetPassword = async (req, res) => {
     if (!IsUserRequestedForForgetPassword) {
       return res.status(400).json({
         success: false,
-        message: "user do not have permisson to change the password first verify it with otp",
+        message:
+          "user do not have permisson to change the password first verify it with otp",
       });
     }
 
