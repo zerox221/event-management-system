@@ -7,6 +7,8 @@ import { useContext } from "react";
 import { userContext } from "../../../context/UserContext";
 import { toast } from "react-toastify";
 import { Navigate, useNavigate } from "react-router-dom";
+import { useState } from "react";
+import { motion } from "framer-motion";
 
 const CreateNewPassword = () => {
   const forgotPasswordSchema = z
@@ -41,17 +43,20 @@ const CreateNewPassword = () => {
   } = useForm({
     resolver: zodResolver(forgotPasswordSchema),
   });
+  const [loading, setLoading] = useState(false);
   const { forgetPasswordEmail } = useContext(userContext);
   const navigate = useNavigate();
 
   if (!forgetPasswordEmail) {
     navigate("/login");
   }
-  
+
   async function ForgotPasswordHandler(data) {
-    console.log("function called");
-    console.log(data);
+    if (loading) {
+      return;
+    }
     try {
+      setLoading(true);
       const response = await api.post("/api/v1/auth/forget/password", {
         email: forgetPasswordEmail,
         newPassword: data.newPassword,
@@ -64,14 +69,19 @@ const CreateNewPassword = () => {
     } catch (error) {
       toast.error(error.response.data.message);
       console.log(error);
+    } finally {
+      setLoading(false);
     }
   }
   return (
-    <div className="h-screen w-full flex justify-center items-center p-2">
+    <div className="h-screen w-full flex md:py-20 py-15 justify-center p-2">
       <form
         onSubmit={handleSubmit(ForgotPasswordHandler)}
-        className="min-h-100 md:w-100 w-full border p-3 border-slate-300 rounded-md flex flex-col gap-8"
+        className="h-fit md:min-h-100  md:w-100 w-full border p-3 py-6 md:p-3 border-slate-300 rounded-md flex flex-col gap-8"
       >
+        {loading && (
+          <div className=" bg-white/30 h-full w-full absolute top-0 left-0"></div>
+        )}
         <div className="flex flex-col gap-1 items-center">
           <h2 className="text-xl font-semibold">Create New Password</h2>
           <span className="text-sm text-neutral-600 text-center">
@@ -119,9 +129,14 @@ const CreateNewPassword = () => {
           {/* <span className='text-xs text-neutral-600'>Must be atleast 6 character long.</span> */}
         </div>
         <div>
-          <button className="p-2 font-medium rounded-md bg-indigo-700 text-white w-full text-center">
-            Reset Password
-          </button>
+          <motion.button
+            whileTap={{
+              scale: 0.95,
+            }}
+            className="p-2 font-medium rounded-md bg-indigo-700 text-white w-full text-center"
+          >
+            {loading ? " Updating password..." : "Reset Password"}
+          </motion.button>
         </div>
       </form>
     </div>

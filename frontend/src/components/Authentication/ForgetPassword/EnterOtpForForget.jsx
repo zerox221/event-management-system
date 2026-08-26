@@ -6,6 +6,7 @@ import { useForm } from "react-hook-form";
 import api from "../../../api/axios";
 import { useState } from "react";
 import { toast } from "react-toastify";
+import { motion } from "framer-motion";
 
 const EnterOtpForForget = () => {
   const {
@@ -14,6 +15,8 @@ const EnterOtpForForget = () => {
     formState: { errors },
   } = useForm();
   const { forgetPasswordEmail } = useContext(userContext);
+  const [loading, setLoading] = useState(false);
+
   const navigate = useNavigate();
   const [error, setError] = useState(false);
 
@@ -22,11 +25,15 @@ const EnterOtpForForget = () => {
   }
 
   async function forgetPasswordHandler(data) {
+    if (loading) {
+      return;
+    }
     const { otp } = data;
     console.log("email : ", forgetPasswordEmail);
     console.log("otp : ", otp);
     console.log(data);
     try {
+      setLoading(true);
       const response = await api.post("/api/v1/auth/verify/forget/otp", {
         otp,
         email: forgetPasswordEmail,
@@ -37,20 +44,26 @@ const EnterOtpForForget = () => {
     } catch (error) {
       toast.error(error.response.data.message);
       console.log(error.response.data.message);
+    } finally {
+      setLoading(false);
     }
   }
 
   return (
-    <div className="h-screen flex flex-col items-center  gap-20 w-full p-2">
-      <div className="text-2xl font-semibold text-center text-blue-700">
-        <h1>Verify OTP</h1>
-      </div>
+    <div className="h-screen py-15 md:py-20  flex flex-col items-center  gap-20 w-full p-2">
+       
+      <div className="min-h-40 w-full relative rounded-xl border border-gray-300 p-4">
+        {loading &&  <div className=" bg-white/20 h-full w-full absolute top-0 left-0">
 
-      <div className="min-h-40 w-full rounded-xl border border-gray-300 p-4">
+            </div>}
         <form
           onSubmit={handleSubmit(forgetPasswordHandler)}
-          className="flex flex-col gap-6 w-full"
+          className="flex  flex-col gap-6 w-full"
         >
+            
+          <div className="text-2xl font-semibold text-center text-blue-700">
+            <h1>Verify OTP</h1>
+          </div>
           <div className="flex flex-col gap-4">
             <h1 className="text-xl font-medium md:text-2xl text-center">
               Check your email
@@ -73,9 +86,15 @@ const EnterOtpForForget = () => {
           </div>
           <div className="w-full flex  justify-center ">
             {/*  to={'/forget/password'} */}
-            <button className="p-3 rounded-md w-full text-center bg-indigo-700 text-white">
-              Verify & Continue
-            </button>
+            <motion.button
+            whileTap={{
+                scale: 0.95,
+            }}
+              disabled={loading}
+              className={`p-3 ${loading?"bg-indigo-400":""} rounded-md w-full text-center bg-indigo-700 text-white`}
+            >
+              {loading ? "Verfying..." : " Verify & Continue "}
+            </motion.button>
           </div>
         </form>
       </div>
